@@ -49,7 +49,7 @@ class PodAttitudeControl(Node):
         self.des_thrust = 0.2
         self.timer = self.create_timer(0.1, self.publish_command)
         self.pitch = 0.0
-
+        self.yaw = 0.0
 
 
     def imu_callback(self, msg):
@@ -58,6 +58,7 @@ class PodAttitudeControl(Node):
         orientation_q = msg.orientation
         euler = self.quaternion_to_euler(orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w)
         pitch_angle = euler[1]  # Index 1 for pitch in the returned tuple
+        self.yaw = euler[2]
         self.pitch = math.degrees(pitch_angle)
 
     def publish_command(self):
@@ -73,10 +74,13 @@ class PodAttitudeControl(Node):
         self.attitude_setpoint.orientation.y = self.des_quaternion[1]
         self.attitude_setpoint.orientation.z = self.des_quaternion[2]
         self.attitude_setpoint.orientation.w = self.des_quaternion[3]
+        diff_yaw = self.des_yaw-self.yaw
+        diff_yaw_thrust = math.fabs(diff_yaw/math.pi)/3.0
+        self.des_thrust = diff_yaw_thrust
         self.attitude_setpoint.thrust = self.des_thrust
         self.actuator_control_pub.publish(self.attitude_setpoint)
-        print(self.pitch, self.des_yaw)
-        self.des_yaw =self.des_yaw+math.radians(0.5)
+        print(self.pitch, self.yaw, self.des_yaw, diff_yaw, diff_yaw_thrust)
+        self.des_yaw =self.des_yaw
 
     def quaternion_to_euler(self, x, y, z, w):
         """
