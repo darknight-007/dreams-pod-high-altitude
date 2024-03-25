@@ -3,7 +3,8 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, DurabilityPolicy
-from px4_msgs.msg import OffboardControlMode, VehicleAttitudeSetpoint, VehicleCommand, VehicleAttitude, FailsafeFlags
+from px4_msgs.msg import OffboardControlMode, VehicleAttitudeSetpoint, VehicleCommand, VehicleAttitude, FailsafeFlags, \
+    VehicleStatus
 import math
 
 
@@ -35,6 +36,10 @@ class OffboardControl(Node):
         # Replace the vehicle status subscriber with a failsafe flags subscriber
         self.failsafe_flags_subscriber = self.create_subscription(
             FailsafeFlags, '/fmu/out/failsafe_flags', self.failsafe_flags_callback, qos_profile)
+        self.vehicle_status_subscriber = self.create_subscription(
+            VehicleStatus, '/fmu/out/vehicle_status', self.vehicle_status_callback, qos_profile)
+
+        self.vehicle_status = VehicleStatus()
 
         # Initialize variables
         self.vehicle_attitude = VehicleAttitude()
@@ -42,7 +47,7 @@ class OffboardControl(Node):
         self.failsafe_flags = FailsafeFlags()
 
         # Create a timer to publish control commands
-        self.timer = self.create_timer(0.1, self.timer_callback)
+        self.timer = self.create_timer(0.05, self.timer_callback)
         self.engage_offboard_mode()
 
     def publish_vehicle_command(self, command, **params) -> None:
@@ -63,6 +68,10 @@ class OffboardControl(Node):
         msg.from_external = True
         msg.timestamp = int(self.get_clock().now().nanoseconds / 1000)
         self.vehicle_command_publisher.publish(msg)
+
+    def vehicle_status_callback(self, vehicle_status):
+        """Callback function for vehicle_status topic subscriber."""
+        self.vehicle_status = vehicle_status
 
     def vehicle_attitude_callback(self, vehicle_attitude):
         """Callback function for vehicle_attitude topic subscriber."""
@@ -106,6 +115,22 @@ class OffboardControl(Node):
         msg.timestamp = int(self.get_clock().now().nanoseconds / 1000)
         self.offboard_control_mode_publisher.publish(msg)
 
+    def set_gimbal_pitch_angle(self, pitch: float) -> None:
+        """
+        Send a command to set the gimbal's pitch angle.
+
+        :param pitch: The desired pitch angle in degrees. Positive values pitch up.
+        """
+        command = VehicleCommand.VEHICLE_CMD_DO_MOUNT_CONTROL
+        # Convert pitch from degrees to radians as VEHICLE_CMD_DO_MOUNT_CONTROL expects radians
+        pitch_radians = math.radians(pitch)
+        self.publish_vehicle_command(command,
+                                     param1=pitch_radians,  # Pitch in radians
+                                     param2=0.0,  # Roll (unused in this case, set to 0)
+                                     param3=0.0,  # Yaw (unused in this case, set to 0)
+                                     param7=2.0)  # MAV_MOUNT_MODE_MAVLINK_TARGETING indicates to point the camera using MAVLink commands
+        self.get_logger().info(f'Set gimbal pitch angle to {pitch} degrees')
+
     def publish_attitude_setpoint(self, roll: float, pitch: float, yaw: float, thrust: float):
         """Publish the attitude setpoint."""
         msg = VehicleAttitudeSetpoint()
@@ -115,20 +140,13 @@ class OffboardControl(Node):
         msg.thrust_body = [0.0, 0.0, thrust]  # Assuming thrust is set in the z component
         msg.timestamp = int(self.get_clock().now().nanoseconds / 1000)
         self.attitude_setpoint_publisher.publish(msg)
+        self.set_gimbal_pitch_angle(-180.0)
         self.get_logger().info(f"Publishing attitude setpoints: Roll {roll}, Pitch {pitch}, Yaw {yaw}, Thrust {thrust}")
 
     def timer_callback(self) -> None:
         """Callback function for the timer."""
         self.publish_offboard_control_heartbeat_signal()
-
-        # Check for offboard mode using failsafe flags instead of vehicle status
-        # You will need to adjust the condition below based on how offboard mode is represented in the failsafe flags
-        if self.failsafe_flags.offboard_control_signal_lost:  # Adjust this condition based on your message structure
-            print("Offboard control signal lost, adjust your conditions and actions accordingly")
-        else:
-            # Example of publishing an attitude setpoint. Adjust values as needed.
-
-            self.publish_attitude_setpoint(0.0, 0.0, 0.0, 0.6)  # Example values
+        self.publish_attitude_setpoint(0.0, 0.0, 1.0, 0.6)  # Example values
 
     def quaternion_to_euler(self, x, y, z, w):
         """
