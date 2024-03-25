@@ -3,10 +3,8 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, DurabilityPolicy
-from px4_msgs.msg import OffboardControlMode, VehicleAttitudeSetpoint, VehicleCommand, VehicleAttitude
+from px4_msgs.msg import OffboardControlMode, VehicleAttitudeSetpoint, VehicleCommand, VehicleAttitude, FailsafeFlags
 import math
-# Assuming FailsafeFlags exists and is the correct type for /fmu/out/failsafe_flags
-from px4_msgs.msg import FailsafeFlags  # Adjust this import based on the actual message type
 
 
 class OffboardControl(Node):
@@ -45,6 +43,26 @@ class OffboardControl(Node):
 
         # Create a timer to publish control commands
         self.timer = self.create_timer(0.1, self.timer_callback)
+        self.engage_offboard_mode()
+
+    def publish_vehicle_command(self, command, **params) -> None:
+        """Publish a vehicle command."""
+        msg = VehicleCommand()
+        msg.command = command
+        msg.param1 = params.get("param1", 0.0)
+        msg.param2 = params.get("param2", 0.0)
+        msg.param3 = params.get("param3", 0.0)
+        msg.param4 = params.get("param4", 0.0)
+        msg.param5 = params.get("param5", 0.0)
+        msg.param6 = params.get("param6", 0.0)
+        msg.param7 = params.get("param7", 0.0)
+        msg.target_system = 1
+        msg.target_component = 1
+        msg.source_system = 1
+        msg.source_component = 1
+        msg.from_external = True
+        msg.timestamp = int(self.get_clock().now().nanoseconds / 1000)
+        self.vehicle_command_publisher.publish(msg)
 
     def vehicle_attitude_callback(self, vehicle_attitude):
         """Callback function for vehicle_attitude topic subscriber."""
@@ -109,13 +127,8 @@ class OffboardControl(Node):
             print("Offboard control signal lost, adjust your conditions and actions accordingly")
         else:
             # Example of publishing an attitude setpoint. Adjust values as needed.
-            current_yaw_quat = self.vehicle_attitude.q
-            roll, pitch, current_yaw = self.quaternion_to_euler(current_yaw_quat[0], current_yaw_quat[1],
-                                                                current_yaw_quat[2], current_yaw_quat[3])
-            yaw_desired = 1.0
-            yaw_delta = yaw_desired - current_yaw
-            print(yaw_desired, current_yaw, yaw_delta)
-            self.publish_attitude_setpoint(0.0, 0.0, yaw_desired, 0.6)  # Example values
+
+            self.publish_attitude_setpoint(0.0, 0.0, 0.0, 0.6)  # Example values
 
     def quaternion_to_euler(self, x, y, z, w):
         """
