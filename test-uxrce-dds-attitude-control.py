@@ -3,7 +3,10 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, DurabilityPolicy
-from px4_msgs.msg import OffboardControlMode, VehicleAttitudeSetpoint, VehicleCommand, VehicleAttitude, VehicleStatus
+from px4_msgs.msg import OffboardControlMode, VehicleAttitudeSetpoint, VehicleCommand, VehicleAttitude
+import math
+# Assuming FailsafeFlags exists and is the correct type for /fmu/out/failsafe_flags
+from px4_msgs.msg import FailsafeFlags  # Adjust this import based on the actual message type
 
 
 class OffboardControl(Node):
@@ -31,12 +34,14 @@ class OffboardControl(Node):
         # Create subscribers
         self.vehicle_attitude_subscriber = self.create_subscription(
             VehicleAttitude, '/fmu/out/vehicle_attitude', self.vehicle_attitude_callback, qos_profile)
-        self.vehicle_status_subscriber = self.create_subscription(
-            VehicleStatus, '/fmu/out/vehicle_status', self.vehicle_status_callback, qos_profile)
+        # Replace the vehicle status subscriber with a failsafe flags subscriber
+        self.failsafe_flags_subscriber = self.create_subscription(
+            FailsafeFlags, '/fmu/out/failsafe_flags', self.failsafe_flags_callback, qos_profile)
 
         # Initialize variables
         self.vehicle_attitude = VehicleAttitude()
-        self.vehicle_status = VehicleStatus()
+        # Replace vehicle status with failsafe flags variable
+        self.failsafe_flags = FailsafeFlags()
 
         # Create a timer to publish control commands
         self.timer = self.create_timer(0.1, self.timer_callback)
@@ -45,11 +50,9 @@ class OffboardControl(Node):
         """Callback function for vehicle_attitude topic subscriber."""
         self.vehicle_attitude = vehicle_attitude
 
-    def vehicle_status_callback(self, vehicle_status):
-        """Callback function for vehicle_status topic subscriber."""
-        self.vehicle_status = vehicle_status
-
-    # Methods for arm, disarm, engage_offboard_mode, land remain the same
+    def failsafe_flags_callback(self, failsafe_flags):
+        """Callback function for failsafe_flags topic subscriber."""
+        self.failsafe_flags = failsafe_flags
 
     def arm(self):
         """Send an arm command to the vehicle."""
@@ -100,9 +103,39 @@ class OffboardControl(Node):
         """Callback function for the timer."""
         self.publish_offboard_control_heartbeat_signal()
 
-        # Example of publishing an attitude setpoint. Adjust values as needed.
-        if self.vehicle_status.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD:
-            self.publish_attitude_setpoint(0.0, 0.0, 1, 0.6)  # Example values
+        # Check for offboard mode using failsafe flags instead of vehicle status
+        # You will need to adjust the condition below based on how offboard mode is represented in the failsafe flags
+        if self.failsafe_flags.offboard_control_signal_lost:  # Adjust this condition based on your message structure
+            print("Offboard control signal lost, adjust your conditions and actions accordingly")
+        else:
+            # Example of publishing an attitude setpoint. Adjust values as needed.
+            current_yaw_quat = self.vehicle_attitude.q
+            roll, pitch, current_yaw = self.quaternion_to_euler(current_yaw_quat[0], current_yaw_quat[1],
+                                                                current_yaw_quat[2], current_yaw_quat[3])
+            yaw_desired = 1.0
+            yaw_delta = yaw_desired - current_yaw
+            print(yaw_desired, current_yaw, yaw_delta)
+            self.publish_attitude_setpoint(0.0, 0.0, yaw_desired, 0.6)  # Example values
+
+    def quaternion_to_euler(self, x, y, z, w):
+        """
+        Convert a quaternion into euler angles (roll, pitch, yaw)
+        roll is rotation around x in radians (counterclockwise)
+        pitch is rotation around y in radians (counterclockwise)
+        yaw is rotation around z in radians (counterclockwise)
+        """
+        t0 = +2.0 * (w * x + y * z)
+        t1 = +1.0 - 2.0 * (x * x + y * y)
+        roll_x = math.atan2(t0, t1)
+        t2 = +2.0 * (w * y - z * x)
+        t2 = +1.0 if t2 > +1.0 else t2
+        t2 = -1.0 if t2 < -1.0 else t2
+        pitch_y = math.asin(t2)
+        t3 = +2.0 * (w * z + x * y)
+        t4 = +1.0 - 2.0 * (y * y + z * z)
+        yaw_z = math.atan2(t3, t4)
+        return roll_x, pitch_y, yaw_z  # in radians
+
 
 def main(args=None) -> None:
     print('Starting offboard control node with attitude control...')
