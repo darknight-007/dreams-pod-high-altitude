@@ -6,7 +6,9 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, DurabilityPo
 from px4_msgs.msg import OffboardControlMode, VehicleAttitudeSetpoint, VehicleCommand, VehicleAttitude, FailsafeFlags, \
     VehicleStatus
 import math
+from tf_transformations import euler_from_quaternion, quaternion_from_euler
 
+from time import time 
 
 class OffboardControl(Node):
     """Node for controlling a vehicle in offboard mode using attitude setpoints."""
@@ -34,8 +36,7 @@ class OffboardControl(Node):
         self.vehicle_attitude_subscriber = self.create_subscription(
             VehicleAttitude, '/fmu/out/vehicle_attitude', self.vehicle_attitude_callback, qos_profile)
         # Replace the vehicle status subscriber with a failsafe flags subscriber
-        self.failsafe_flags_subscriber = self.create_subscription(
-            FailsafeFlags, '/fmu/out/failsafe_flags', self.failsafe_flags_callback, qos_profile)
+        # Create subscribers
         self.vehicle_status_subscriber = self.create_subscription(
             VehicleStatus, '/fmu/out/vehicle_status', self.vehicle_status_callback, qos_profile)
 
@@ -43,12 +44,16 @@ class OffboardControl(Node):
 
         # Initialize variables
         self.vehicle_attitude = VehicleAttitude()
-        # Replace vehicle status with failsafe flags variable
-        self.failsafe_flags = FailsafeFlags()
+
+        self.offboard_setpoint_counter = 0
+        self.curr_pitch_deg = 0.0
+        self.start_time = self.get_clock().now()
+        self.pitch_target = 0.0
+        self.cycle = 0.0
+        self.TIME_SCALAR = 10
 
         # Create a timer to publish control commands
         self.timer = self.create_timer(0.05, self.timer_callback)
-        self.engage_offboard_mode()
 
     def publish_vehicle_command(self, command, **params) -> None:
         """Publish a vehicle command."""
@@ -69,17 +74,16 @@ class OffboardControl(Node):
         msg.timestamp = int(self.get_clock().now().nanoseconds / 1000)
         self.vehicle_command_publisher.publish(msg)
 
-    def vehicle_status_callback(self, vehicle_status):
-        """Callback function for vehicle_status topic subscriber."""
-        self.vehicle_status = vehicle_status
-
     def vehicle_attitude_callback(self, vehicle_attitude):
         """Callback function for vehicle_attitude topic subscriber."""
         self.vehicle_attitude = vehicle_attitude
+        quat = self.vehicle_attitude.q
+        curr_roll_rad, curr_pitch_rad, curr_yaw_rad = euler_from_quaternion(quat)
+        self.curr_pitch_deg = math.degrees(curr_pitch_rad)
 
-    def failsafe_flags_callback(self, failsafe_flags):
-        """Callback function for failsafe_flags topic subscriber."""
-        self.failsafe_flags = failsafe_flags
+    def vehicle_status_callback(self, vehicle_status):
+        """Callback function for vehicle_status topic subscriber."""
+        self.vehicle_status = vehicle_status
 
     def arm(self):
         """Send an arm command to the vehicle."""
@@ -115,57 +119,36 @@ class OffboardControl(Node):
         msg.timestamp = int(self.get_clock().now().nanoseconds / 1000)
         self.offboard_control_mode_publisher.publish(msg)
 
-    def set_gimbal_pitch_angle(self, pitch: float) -> None:
-        """
-        Send a command to set the gimbal's pitch angle.
-
-        :param pitch: The desired pitch angle in degrees. Positive values pitch up.
-        """
-        command = VehicleCommand.VEHICLE_CMD_DO_MOUNT_CONTROL
-        # Convert pitch from degrees to radians as VEHICLE_CMD_DO_MOUNT_CONTROL expects radians
-        pitch_radians = math.radians(pitch)
-        self.publish_vehicle_command(command,
-                                     param1=pitch_radians,  # Pitch in radians
-                                     param2=0.0,  # Roll (unused in this case, set to 0)
-                                     param3=0.0,  # Yaw (unused in this case, set to 0)
-                                     param7=2.0)  # MAV_MOUNT_MODE_MAVLINK_TARGETING indicates to point the camera using MAVLink commands
-        self.get_logger().info(f'Set gimbal pitch angle to {pitch} degrees')
-
     def publish_attitude_setpoint(self, roll: float, pitch: float, yaw: float, thrust: float):
         """Publish the attitude setpoint."""
         msg = VehicleAttitudeSetpoint()
-        msg.roll_body = roll
-        msg.pitch_body = pitch
-        msg.yaw_body = yaw
+        quat = quaternion_from_euler(0, 0, yaw)
+        msg.q_d = quat 
+        msg.yaw_body = 0.0
         msg.thrust_body = [0.0, 0.0, thrust]  # Assuming thrust is set in the z component
-        msg.timestamp = int(self.get_clock().now().nanoseconds / 1000)
+        clock__now = self.get_clock().now()
+        nanoseconds = clock__now.nanoseconds
+        msg.timestamp = int(nanoseconds / 1000)
+        self.publish_offboard_control_heartbeat_signal()
+
         self.attitude_setpoint_publisher.publish(msg)
-        self.set_gimbal_pitch_angle(-180.0)
-        self.get_logger().info(f"Publishing attitude setpoints: Roll {roll}, Pitch {pitch}, Yaw {yaw}, Thrust {thrust}")
+        self.get_logger().info(
+            f"Publishing attitude setpoints: timestamp {self.cycle}, cosine {self.pitch_target}, Roll {roll}, Pitch {pitch}, Yaw {yaw}, Thrust {thrust}, Curr yaw (dg) {self.curr_pitch_deg}")
 
     def timer_callback(self) -> None:
         """Callback function for the timer."""
         self.publish_offboard_control_heartbeat_signal()
-        self.publish_attitude_setpoint(0.0, 0.0, 1.0, 0.6)  # Example values
 
-    def quaternion_to_euler(self, x, y, z, w):
-        """
-        Convert a quaternion into euler angles (roll, pitch, yaw)
-        roll is rotation around x in radians (counterclockwise)
-        pitch is rotation around y in radians (counterclockwise)
-        yaw is rotation around z in radians (counterclockwise)
-        """
-        t0 = +2.0 * (w * x + y * z)
-        t1 = +1.0 - 2.0 * (x * x + y * y)
-        roll_x = math.atan2(t0, t1)
-        t2 = +2.0 * (w * y - z * x)
-        t2 = +1.0 if t2 > +1.0 else t2
-        t2 = -1.0 if t2 < -1.0 else t2
-        pitch_y = math.asin(t2)
-        t3 = +2.0 * (w * z + x * y)
-        t4 = +1.0 - 2.0 * (y * y + z * z)
-        yaw_z = math.atan2(t3, t4)
-        return roll_x, pitch_y, yaw_z  # in radians
+        if self.offboard_setpoint_counter == 10:
+            self.engage_offboard_mode()
+            self.arm()
+
+        if self.vehicle_status.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD:
+            target_yaw = math.cos(time()/2)/1.5
+            self.publish_attitude_setpoint(0.0, 0.0, target_yaw, math.fabs(target_yaw))  # Example values
+
+        if self.offboard_setpoint_counter < 11:
+            self.offboard_setpoint_counter += 1
 
 
 def main(args=None) -> None:
