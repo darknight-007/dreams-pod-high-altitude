@@ -53,7 +53,7 @@ class OffboardControl(Node):
         self.TIME_SCALAR = 10
 
         # Create a timer to publish control commands
-        self.timer = self.create_timer(0.05, self.timer_callback)
+        self.timer = self.create_timer(0.1, self.timer_callback)
 
     def publish_vehicle_command(self, command, **params) -> None:
         """Publish a vehicle command."""
@@ -116,24 +116,23 @@ class OffboardControl(Node):
         msg.acceleration = False
         msg.attitude = True
         msg.body_rate = False
-        msg.timestamp = int(self.get_clock().now().nanoseconds / 1000)
+        
         self.offboard_control_mode_publisher.publish(msg)
 
     def publish_attitude_setpoint(self, roll: float, pitch: float, yaw: float, thrust: float):
         """Publish the attitude setpoint."""
         msg = VehicleAttitudeSetpoint()
-        quat = quaternion_from_euler(0, 0, yaw)
+        quat = quaternion_from_euler(yaw, pitch, yaw)
         msg.q_d = quat 
-        msg.yaw_body = 0.0
+        print(quat)
+       
         msg.thrust_body = [0.0, 0.0, thrust]  # Assuming thrust is set in the z component
-        clock__now = self.get_clock().now()
-        nanoseconds = clock__now.nanoseconds
-        msg.timestamp = int(nanoseconds / 1000)
+        msg.timestamp = int(self.get_clock().now().nanoseconds / 1000)
         self.publish_offboard_control_heartbeat_signal()
 
         self.attitude_setpoint_publisher.publish(msg)
-        self.get_logger().info(
-            f"Publishing attitude setpoints: timestamp {self.cycle}, cosine {self.pitch_target}, Roll {roll}, Pitch {pitch}, Yaw {yaw}, Thrust {thrust}, Curr yaw (dg) {self.curr_pitch_deg}")
+        #self.get_logger().info(
+        #    f"Publishing attitude setpoints: timestamp {self.cycle}, cosine {self.pitch_target}, Roll {roll}, Pitch {pitch}, Yaw {yaw}, Thrust {thrust}, Curr yaw (dg) {self.curr_pitch_deg}")
 
     def timer_callback(self) -> None:
         """Callback function for the timer."""
@@ -143,10 +142,12 @@ class OffboardControl(Node):
             self.engage_offboard_mode()
             self.arm()
 
-        if self.vehicle_status.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD:
-            target_yaw = math.cos(time()/2)/1.5
-            self.publish_attitude_setpoint(0.0, 0.0, target_yaw, math.fabs(target_yaw))  # Example values
-
+        #if self.vehicle_status.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD:
+        target_yaw = math.pi*math.cos(time())
+        #target_yaw = 90
+        self.publish_attitude_setpoint(0.0, 0.0, target_yaw, 0.0)  # Example values
+        self.publish_offboard_control_heartbeat_signal()
+ 
         if self.offboard_setpoint_counter < 11:
             self.offboard_setpoint_counter += 1
 
@@ -165,3 +166,7 @@ if __name__ == '__main__':
         main()
     except Exception as e:
         print(e)
+
+
+
+
