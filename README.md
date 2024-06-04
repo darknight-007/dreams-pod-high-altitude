@@ -37,9 +37,6 @@ All decision-making happens onboard the payload, with computations split between
 
 
 
-
-
-
 Figure 4: Campus field test of prototype system for yaw stabilization
 
 Video of sun-tracking experient at ground level during April 8 partial solar eclipse in Arizona: https://www.youtube.com/shorts/dlAszII4H6c
@@ -50,12 +47,12 @@ NASA Flight Opportunities Tech Flights (Lunar Lander ExoCam), NSF CNS 152161, Be
 
 References 
 
-WMO (2016). Guide to Instruments and Methods of Observation. World Meteorological Organization, WMO-No. 8.
-Sargent, M., et al. (2018). Advances in weather prediction technology: Radiosondes. Weather, 73(6), 186-191.
-Bauer, P., et al. (2015). The quiet revolution of numerical weather prediction. Nature, 525(7567), 47-55.
-Lorenz, T., and Willemsen, P. (2020). Assimilation of high-resolution radiosonde data in the ICON model: Impact on weather forecasts. Weather and Forecasting, 35(1), 381-395.
-Ferrare, R. A., et al. (2016). Evaluation of Daytime Measurements of Aerosols and Water Vapor made by an Operational Raman Lidar over the Southern Great Plains. Journal of Geophysical Research: Atmospheres, 121(3), 1298-1318.
-Smith, D. J., et al. (2017). High-Altitude Aerosol Sampling: Using Balloons to Investigate Aerosol-Cloud-Climate Interactions. Eos, 98.
-Bryant, N., et al. (2020). Vertical Stratification of Microbes in the High-Altitude Atmosphere. Frontiers in Environmental Science, 8, 575762.
-DeLeon-Rodriguez, N., et al. (2021). Microbiome of the upper troposphere and lower stratosphere: taxa variability and potential impacts on clouds and climate. Scientific Reports, 11(1), 5460.
-Kallmeyer, J. (2018). Aerobiology: A frontier in microbial ecology. FEMS Microbiology Ecology, 94(6), fiy077.
+* WMO (2016). Guide to Instruments and Methods of Observation. World Meteorological Organization, WMO-No. 8.
+* Sargent, M., et al. (2018). Advances in weather prediction technology: Radiosondes. Weather, 73(6), 186-191.
+* Bauer, P., et al. (2015). The quiet revolution of numerical weather prediction. Nature, 525(7567), 47-55.
+* Lorenz, T., and Willemsen, P. (2020). Assimilation of high-resolution radiosonde data in the ICON model: Impact on weather forecasts. Weather and Forecasting, 35(1), 381-395.
+* Ferrare, R. A., et al. (2016). Evaluation of Daytime Measurements of Aerosols and Water Vapor made by an Operational Raman Lidar over the Southern Great Plains. Journal of Geophysical Research: Atmospheres, 121(3), 1298-1318.
+* Smith, D. J., et al. (2017). High-Altitude Aerosol Sampling: Using Balloons to Investigate Aerosol-Cloud-Climate Interactions. Eos, 98.
+* Bryant, N., et al. (2020). Vertical Stratification of Microbes in the High-Altitude Atmosphere. Frontiers in Environmental Science, 8, 575762.
+* DeLeon-Rodriguez, N., et al. (2021). Microbiome of the upper troposphere and lower stratosphere: taxa variability and potential impacts on clouds and climate. Scientific Reports, 11(1), 5460.
+* Kallmeyer, J. (2018). Aerobiology: A frontier in microbial ecology. FEMS Microbiology Ecology, 94(6), fiy077.
