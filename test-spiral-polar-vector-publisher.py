@@ -8,10 +8,11 @@ class PolarVectorPublisher(Node):
         super().__init__('polar_vector_publisher')
         self.publisher_ = self.create_publisher(Vector3, 'polar_vector', 10)
         self.timer = self.create_timer(1, self.timer_callback)
+        self.init_y = -60.0
         self.x = 0.0  # Angle in degrees
-        self.y = -60.0  # Initial value for y
-        self.delta_x = 5.0  # Increment for x in degrees
-        self.delta_y = 10.0  # Increment for y
+        self.y = self.init_y  # Initial value for y
+        self.delta_x = 45.0  # Increment for x in degrees
+        self.delta_y = 5.0  # Increment for y
 
     def timer_callback(self):
         msg = Vector3()
@@ -26,9 +27,9 @@ class PolarVectorPublisher(Node):
         self.x += self.delta_x
         if self.x > 360:
             self.x = 0.0
-            self.y += self.delta_y
-            if self.y > 90:
-                self.y = -10.0
+        self.y += self.delta_y
+        if self.y > 50:
+            self.y = self.init_y
 
 def main(args=None):
     rclpy.init(args=args)
