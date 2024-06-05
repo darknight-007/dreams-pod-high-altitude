@@ -16,16 +16,16 @@ High-altitude balloons, often called weather balloons, play a critical role in w
 We introduce a lightweight, low SWaP (< 1.5 kg) high-altitude balloon payload for aerobiological sampling. The innovation incorporates the latest drone flight control technologies and custom environmental sensing hardware. A ground-tested prototype for the payload has been designed.
 
 Description: The main body, inspired by the CubeSat design format and quadrotor drone layout, consists of multiple levels interconnected with load-bearing aluminum spacers. The top level (6) houses a Pixhawk flight controller running the PX4 flight stack, and a GPS and compass module. The subsequent level (5) can accommodate an aerobiological sampling payload capable of collecting air samples and storing them in filtrates, triggered by onboard compute for adaptive sampling. The fourth level features the EarthPod sensor probe, which conducts various atmospheric measurements, including relative humidity, temperature, wind speed and direction, and light intensity/flux, and is capable of decision-making using an onboard Arduino Feather. The third level contains two reaction wheels for stabilizing yaw angle (heading) to point in a desired direction, such as imaging specific ground features with a pitch-gimbaled multi-spectral camera and spectrometer imaging payload with onboard compute. The second level houses two 4S lithium-polymer batteries to power the system's various components. The imaging system is situated at the first level (or bottom) of the payload 'tower', with both yaw stabilization of the tower and pitch stabilization of the gimbal mechanism managed by the Pixhawk flight controller on level 6. Level 1 also houses a radio telemetry link and antenna, connected to the flight controller on level 6. The payload is suspended using load-bearing 360 degree swivel. 
-
-Figure 1: System architecture depicting the primary components of the payload.
-
-
-Figure 2: Front view of the payload 'tower', displaying each of the seven levels and their functions.
+![image](https://github.com/darknight-007/dreams-pod-high-altitude/assets/3958994/82b1199c-2163-4a96-8eea-ca734cfbffe7)
 
 
 
+![image](https://github.com/darknight-007/dreams-pod-high-altitude/assets/3958994/3326ffeb-d4bd-4b31-a082-8ec8b4db836c)
 
-Figure 3: 3D rendering of the payload (left and center), and a manifestation where multiple payloads with potentially complementary functions can be linked together (right).  
+
+
+![image](https://github.com/darknight-007/dreams-pod-high-altitude/assets/3958994/ee785b45-6aeb-4c6c-bdc6-8917d78ce8d2)
+ 
 
 In some manifestations, solar panels can be added to one or more sides of the payload tower, and the yaw stabilization system can ensure the panels are on average, directed at the sun. 
 
@@ -36,8 +36,7 @@ The payload can also be used as a ground based sensor probe, in a sensor network
 All decision-making happens onboard the payload, with computations split between flight controller (guidance, navigation, and control), EarthPod sensor probe (atmospheric and aerobiological sampling), and Intel Atom or ARM compute to carry out image processing tasks. A bank of lithium polymer batteries power the system, and can be recharged with actively oriented solar panels that can be reoriented by the yaw stabilization system. 
 
 
-
-Figure 4: Campus field test of prototype system for yaw stabilization
+![image](https://github.com/darknight-007/dreams-pod-high-altitude/assets/3958994/ffbbd9b4-0b26-4eef-856f-b4dff0201f8b)
 
 Video of sun-tracking experient at ground level during April 8 partial solar eclipse in Arizona: https://www.youtube.com/shorts/dlAszII4H6c
 
