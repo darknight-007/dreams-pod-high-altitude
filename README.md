@@ -6,13 +6,14 @@
 *EarthPod sensor probe* – Cole Bauer, Katrina Davis, Darwin Mick, Desmond Hanaan, Elizabeth Trembath-Reichert  
 *Balloon payload considerations* – Scott Clemens, Anyell Mata, Tom Sharp
 
+## Introduction
+
+We introduce a lightweight, low SWaP (< 1.5 kg) high-altitude balloon payload for aerobiological sampling. The innovation incorporates the latest drone flight control technologies and custom environmental sensing hardware. A ground-tested prototype for the payload has been designed.
+
 High-altitude balloons, often called weather balloons, play a critical role in weather forecasting by collecting essential atmospheric data (WMO, 2016). These balloons, typically filled with hydrogen or helium, carry instruments called radiosondes aloft, which measure temperature, humidity, pressure, and wind speed and direction at various altitudes (Sargent et al., 2018). As the balloons ascend through the atmosphere, the radiosondes transmit real-time data to ground-based receiving stations. Meteorologists then incorporate this information into numerical weather prediction (NWP) models, which simulate the future state of the atmosphere (Bauer et al., 2015). The assimilation of high-altitude balloon observations into NWP models significantly improves forecast accuracy, particularly in the short to medium range (Lorenz and Willemsen, 2020). Moreover, the data collected by these balloons also contribute to the calibration and validation of satellite-based remote sensing observations, further enhancing the quality of weather forecasts (Ferrare et al., 2016).
 
 High-altitude balloons have also emerged as an essential tool for aerobiological sampling, allowing scientists to collect and analyze airborne microorganisms at various altitudes (Smith et al., 2017). These balloons are equipped with specialized devices, such as solid-state impactors and liquid impingers, which efficiently capture biological particles suspended in the atmosphere (Bryant et al., 2020). By launching these balloons to elevations of up to 30 kilometers, researchers can study the microbial composition and diversity within different atmospheric layers, providing valuable insights into the transport and survivability of microorganisms in extreme environments (DeLeon-Rodriguez et al., 2021). This information has significant implications for understanding the role of airborne microbes in cloud formation, precipitation, and biogeochemical cycling, as well as potential applications in detecting and monitoring the spread of pathogens (Kallmeyer, 2018). As aerobiological research continues to evolve, high-altitude balloons will remain a vital resource for expanding our knowledge of Earth's biosphere and its interactions with the atmosphere.
 
-## Introduction
-
-We introduce a lightweight, low SWaP (< 1.5 kg) high-altitude balloon payload for aerobiological sampling. The innovation incorporates the latest drone flight control technologies and custom environmental sensing hardware. A ground-tested prototype for the payload has been designed.
 
 ## Description
 
