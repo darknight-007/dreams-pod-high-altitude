@@ -10,11 +10,6 @@
 
 We introduce a lightweight, low SWaP (< 1.5 kg) high-altitude balloon payload for aerobiological sampling. The innovation incorporates the latest drone flight control technologies and custom environmental sensing hardware. A ground-tested prototype for the payload has been designed.
 
-High-altitude balloons, often called weather balloons, play a critical role in weather forecasting by collecting essential atmospheric data (WMO, 2016). These balloons, typically filled with hydrogen or helium, carry instruments called radiosondes aloft, which measure temperature, humidity, pressure, and wind speed and direction at various altitudes (Sargent et al., 2018). As the balloons ascend through the atmosphere, the radiosondes transmit real-time data to ground-based receiving stations. Meteorologists then incorporate this information into numerical weather prediction (NWP) models, which simulate the future state of the atmosphere (Bauer et al., 2015). The assimilation of high-altitude balloon observations into NWP models significantly improves forecast accuracy, particularly in the short to medium range (Lorenz and Willemsen, 2020). Moreover, the data collected by these balloons also contribute to the calibration and validation of satellite-based remote sensing observations, further enhancing the quality of weather forecasts (Ferrare et al., 2016).
-
-High-altitude balloons have also emerged as an essential tool for aerobiological sampling, allowing scientists to collect and analyze airborne microorganisms at various altitudes (Smith et al., 2017). These balloons are equipped with specialized devices, such as solid-state impactors and liquid impingers, which efficiently capture biological particles suspended in the atmosphere (Bryant et al., 2020). By launching these balloons to elevations of up to 30 kilometers, researchers can study the microbial composition and diversity within different atmospheric layers, providing valuable insights into the transport and survivability of microorganisms in extreme environments (DeLeon-Rodriguez et al., 2021). This information has significant implications for understanding the role of airborne microbes in cloud formation, precipitation, and biogeochemical cycling, as well as potential applications in detecting and monitoring the spread of pathogens (Kallmeyer, 2018). As aerobiological research continues to evolve, high-altitude balloons will remain a vital resource for expanding our knowledge of Earth's biosphere and its interactions with the atmosphere.
-
-
 ## Description
 
 The main body, inspired by the CubeSat design format and quadrotor drone layout, consists of multiple levels interconnected with load-bearing aluminum spacers. 
@@ -52,14 +47,3 @@ Tested using ROS2 Humble, on Ubuntu 22.04 running on Hardkernel Odroid M1, requi
 
 NASA Flight Opportunities Tech Flights (Lunar Lander ExoCam), NSF CNS 152161, Behar endowment funds, Earth Innovation Hub Corp. (501c3).
 
-## References
-
-- WMO (2016). Guide to Instruments and Methods of Observation. World Meteorological Organization, WMO-No. 8.
-- Sargent, M., et al. (2018). Advances in weather prediction technology: Radiosondes. Weather, 73(6), 186-191.
-- Bauer, P., et al. (2015). The quiet revolution of numerical weather prediction. Nature, 525(7567), 47-55.
-- Lorenz, T., and Willemsen, P. (2020). Assimilation of high-resolution radiosonde data in the ICON model: Impact on weather forecasts. Weather and Forecasting, 35(1), 381-395.
-- Ferrare, R. A., et al. (2016). Evaluation of Daytime Measurements of Aerosols and Water Vapor made by an Operational Raman Lidar over the Southern Great Plains. Journal of Geophysical Research: Atmospheres, 121(3), 1298-1318.
-- Smith, D. J., et al. (2017). High-Altitude Aerosol Sampling: Using Balloons to Investigate Aerosol-Cloud-Climate Interactions. Eos, 98.
-- Bryant, N., et al. (2020). Vertical Stratification of Microbes in the High-Altitude Atmosphere. Frontiers in Environmental Science, 8, 575762.
-- DeLeon-Rodriguez, N., et al. (2021). Microbiome of the upper troposphere and lower stratosphere: taxa variability and potential impacts on clouds and climate. Scientific Reports, 11(1), 5460.
-- Kallmeyer, J. (2018). Aerobiology: A frontier in microbial ecology. FEMS Microbiology Ecology, 94(6), fiy077.
